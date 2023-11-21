@@ -1,12 +1,3 @@
-const testList = [88, 95, 39, 48, 42, 37, 61, 26, 8, 11, 88, 39, 42, 61, 8];
-// for (let i = 0; i < 10; i++) {
-//   testList.push(Math.floor(Math.random() * 100));
-// }
-// for (let i = 0; i < 10; i += 2) {
-//   testList.push(testList[i]);
-// }
-const tree = createTree(testList);
-
 function createTree(array) {
   let root = buildTree(array);
 
@@ -23,6 +14,7 @@ function createTree(array) {
     reBalance,
     findNode,
     insertNode,
+    deleteNode,
   };
 }
 
@@ -104,20 +96,61 @@ function insertNode(data) {
     }
   }
 }
+function deleteNode(data, node = this.root) {
+  if (node === null) {
+    throw new Error("The tree is empty");
+  }
+  if (node.data === data) {
+    if (node.right && node.left) {
+      this.root = getNextBiggestNode(node);
+    } else if (!node.right && !node.left) this.root = null;
+    else this.root = node.right ? node.right : node.left;
+    return;
+  }
+
+  while (node !== null) {
+    if (data > node.data) {
+      if (node.right && node.right.data === data) {
+        node.right = getNextBiggestNode(node.right);
+        return;
+      } else {
+        node = node.right;
+        continue;
+      }
+    }
+    if (data < node.data) {
+      if (node.left && node.left.data === data) {
+        node.left = getNextBiggestNode(node.left);
+        return;
+      } else {
+        node = node.left;
+        continue;
+      }
+    }
+  }
+  throw new Error("Node not in the tree");
+}
 
 function getNextBiggestNode(node) {
-  if (!node.right && !node.left) {
-    return node;
-  } else if (node.right && node.left) {
-    if (node.right.left) {
-      const nextBiggestNode = getNextBiggestNode(node.right.left);
+  if (node.right && node.right.left === null) {
+    node.right.left = node.left;
+    return node.right;
+  } else if (!node.right) {
+    return node.left ? node.left : null;
+  } else {
+    const nextBiggestNode = node.right.left;
+    if (nextBiggestNode.right) {
+      const nextNextBiggestNode = getNextBiggestNode(nextBiggestNode);
+      node.right.left = nextNextBiggestNode;
       nextBiggestNode.right = node.right;
+      nextBiggestNode.left = node.left;
+      return nextBiggestNode;
+    } else {
       node.right.left = nextBiggestNode.left;
+      nextBiggestNode.right = node.right;
+      nextBiggestNode.left = node.left;
       return nextBiggestNode;
     }
-    return node.right;
-  } else {
-    return node.right ? node.right : node.left;
   }
 }
 function findNode(data) {
